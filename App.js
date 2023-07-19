@@ -1,20 +1,66 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ListView,
+  ActivityIndicator } from 'react-native';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Hello World!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  const URL = 'https://www.thecocktaildb.com/api/json/v2/9973533/recent.php';
+
+  export default class Recipe extends React.Component {
+    constructor(props) {
+      super(props);
+    this.state = {
+      isLoading: true
+    }
+    }
+  componentDidMount() {
+    return fetch(URL)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          isLoading: false,
+          meals: responseJson.meals
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  render() {
+    if (this.state.isLoading) {
+      return (
+        <View style={{flex: 1, paddingTop: 20}}>
+          <ActivityIndicator 
+            color = '#bc2b78'
+            size = 'large'
+            style = {styles.activityIndicator}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View style={{flex: 1, paddingTop:20}}>
+        <FlatList
+          data={this.state.meals}
+          renderItem={({item}) => <Text>{item.strMeal}, {item.strArea}</Text>}
+          keyExtractor={(item, index) => index}
+        />
+      </View>
+    );
+  }
+  }
+
+  const styles = StyleSheet.create({
+    activityIndicator: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: 80
+    },
+  });
